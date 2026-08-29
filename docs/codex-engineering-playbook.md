@@ -35,6 +35,10 @@ Codex
 │   ├─ handoff
 │   └─ setup-matt-pocock-skills
 │
+├─ Leonxlnx / taste-skill
+│   └─ frontend の visual direction を補完
+│      Brief → Design Read → Visual Rules → Implement → Browser Verify
+│
 └─ Model strategy
     ├─ Luna  = 小さく明確で安価に完結する仕事
     ├─ Terra = 通常開発のデフォルト
@@ -139,6 +143,196 @@ setup-matt-pocock-skills
 を実行する。
 
 これは issue tracker、triage labels、domain docs の場所などを repo ごとに設定する。
+
+---
+
+## 2.3 Leonxlnx / taste-skill
+
+### 結論
+
+`taste-skill` は Addy の `frontend-ui-engineering` を置き換えるものではない。
+
+次の分担で使う。
+
+```text
+design-taste-frontend
+    ↓
+brief の解釈、visual direction、layout、type、color、motion の方針
+
+frontend-ui-engineering
+    ↓
+production-quality implementation、responsive、accessibility、UI states
+
+browser-testing-with-devtools
+    ↓
+実ブラウザで visual / runtime verification
+```
+
+主 skill の `design-taste-frontend` は landing page、portfolio、editorial、redesign 向け。dashboard、data table、multi-step product UI の一般解としては使わない。
+
+2026-08-29 時点の既定版は **v2 experimental**。有用だが upstream の指示が安定版より変わりやすいため、最初は global ではなく project scope で試す。
+
+### 導入前に一覧を見る
+
+リポジトリに含まれる skill 名と説明を確認するだけなら：
+
+```bash
+npx skills add Leonxlnx/taste-skill --list
+```
+
+`--skill` に渡す値は folder 名ではなく、各 `SKILL.md` frontmatter の `name:`。
+
+公開 skill も agent に与える実行指示である。導入前に対象の `SKILL.md` を読み、既存の安全ルール、design system、依存関係、アクセシビリティ方針と矛盾しないか確認する。
+
+### 推奨：Codex の project scope に主 skill だけ入れる
+
+```bash
+npx skills add Leonxlnx/taste-skill \
+  --skill design-taste-frontend \
+  --agent codex
+```
+
+project scope の Codex skill は通常 `.agents/skills/` に配置される。チームで同じ visual workflow を使う repo だけ commit 対象にする。
+
+個人の全 project で使うと判断した後に global 化する：
+
+```bash
+npx skills add Leonxlnx/taste-skill \
+  --skill design-taste-frontend \
+  --global \
+  --agent codex
+```
+
+`skills` CLI は通常 symlink を推奨する。symlink を使えない環境、または agent ごとに独立コピーが必要な場合だけ `--copy` を追加する。
+
+### v1 に固定する場合
+
+v2 の変更で既存 workflow が壊れる具体的な理由がある場合だけ、互換版を入れる。
+
+```bash
+npx skills add Leonxlnx/taste-skill \
+  --skill design-taste-frontend-v1 \
+  --agent codex
+```
+
+新規導入で「安定していそうだから」という理由だけで v1 を選ばない。まず v2 を representative UI task で評価し、問題を再現できた場合に v1 と比較する。
+
+### 導入後の確認
+
+```bash
+npx skills list
+```
+
+Codex では skill の変更を通常自動検出する。selector に出ない場合は Codex を再起動する。
+
+Codex CLI / IDE では `/skills` で確認するか、prompt で明示する。
+
+```text
+$design-taste-frontend
+
+この SaaS landing page を実装して。
+対象は技術責任者。信頼感を優先し、過剰な motion は避ける。
+最初に Design Read と 3 dials を提示してから実装する。
+```
+
+### 運用コマンド
+
+| 目的 | コマンド | 使うタイミング |
+|---|---|---|
+| 候補を見る | `npx skills add Leonxlnx/taste-skill --list` | 導入前、upstream に skill が増えたか確認するとき |
+| 主 skill を project に追加 | `npx skills add Leonxlnx/taste-skill --skill design-taste-frontend --agent codex` | 特定 repo で試すときの既定 |
+| 主 skill を global に追加 | `npx skills add Leonxlnx/taste-skill --skill design-taste-frontend -g -a codex` | 複数 repo で有効性を確認した後 |
+| 一時利用 | `npx skills use Leonxlnx/taste-skill --skill design-taste-frontend` | install せず生成された prompt を確認したいとき |
+| 導入済み一覧 | `npx skills list` | install 後、重複や scope を確認するとき |
+| 更新 | `npx skills update design-taste-frontend` | changelog と差分を読んだ後 |
+| 削除 | `npx skills remove design-taste-frontend` | routing 競合、品質低下、利用実績なしの場合 |
+
+CLI の匿名 telemetry を止める必要がある環境では、実行時に `DISABLE_TELEMETRY=1` または `DO_NOT_TRACK=1` を設定する。
+
+### どの skill を使うか
+
+13個を一括導入せず、deliverable と問題に合うものだけ選ぶ。
+
+| 状況 / deliverable | Install name | 判断 |
+|---|---|---|
+| landing、portfolio、editorial、一般的な redesign | `design-taste-frontend` | 最初に選ぶ既定。v2 experimental |
+| v2 で再現可能な問題がある既存 workflow | `design-taste-frontend-v1` | 互換性が必要な場合だけ |
+| Codex で強い非対称 layout と GSAP motion が必要 | `gpt-taste` | Awwwards 的な表現を意図的に求める場合。通常 UI には強すぎる |
+| 画像で方向性を決めてから web 実装まで行う | `image-to-code` | visual fidelity が要件で、image generation を使えるとき |
+| 既存 website / app の見た目を監査して改善 | `redesign-existing-projects` | greenfield ではなく、機能を保った redesign |
+| 落ち着いた高級感のある web 表現 | `high-end-visual-design` | aesthetic が明確な場合だけ。主 skill と無目的に重ねない |
+| editorial / utilitarian minimalism | `minimalist-ui` | visual direction がすでに minimal と決まっているとき |
+| industrial / Swiss / tactical brutalism | `industrial-brutalist-ui` | data-heavy または editorial で意図的に採用するとき |
+| model が placeholder や途中省略を繰り返す | `full-output-enforcement` | design skill ではなく出力完全性の補助。常用しない |
+| Google Stitch 用の design source | `stitch-design-taste` | `DESIGN.md` を Stitch に渡すとき |
+| web section の reference images | `imagegen-frontend-web` | code ではなく section ごとの画像が成果物のとき |
+| mobile flow の reference images | `imagegen-frontend-mobile` | code ではなく mobile screen images が成果物のとき |
+| identity / logo / brand board | `brandkit` | UI 実装より前に brand system image が必要なとき |
+
+追加 skill の導入形式：
+
+```bash
+npx skills add Leonxlnx/taste-skill \
+  --skill redesign-existing-projects \
+  --agent codex
+```
+
+### 3 dials
+
+主 skill は次の3値で出力傾向を調整する。
+
+| Dial | 低い値 | 高い値 |
+|---|---|---|
+| `DESIGN_VARIANCE` | 対称、保守的 | 非対称、実験的 |
+| `MOTION_INTENSITY` | 静的、hover 中心 | scroll / physics / cinematic |
+| `VISUAL_DENSITY` | 余白が広い | 情報量が多い |
+
+upstream の baseline は `8 / 6 / 4` だが、毎回固定しない。brief、audience、brand、accessibility constraints から決める。
+
+例：
+
+```text
+$design-taste-frontend
+
+Developer portfolio を redesign する。
+既存の URL、navigation label、content、機能は維持する。
+DESIGN_VARIANCE=6、MOTION_INTENSITY=4、VISUAL_DENSITY=4。
+まず現状を audit し、変更前に Design Read を1行で示す。
+```
+
+### 組み合わせ方
+
+```text
+新規 marketing page
+design-taste-frontend
+→ source-driven-development       # framework/library API
+→ frontend-ui-engineering         # implementation quality
+→ browser-testing-with-devtools   # runtime / visual QA
+
+既存 site の redesign
+redesign-existing-projects
+→ 必要なら design-taste-frontend
+→ frontend-ui-engineering
+→ browser-testing-with-devtools
+
+image-first
+imagegen-frontend-web または image-to-code
+→ reference image を承認
+→ frontend-ui-engineering
+→ browser-testing-with-devtools
+```
+
+競合した場合の優先順位：
+
+```text
+user / product requirements
+→ existing design system and brand assets
+→ accessibility and framework official guidance
+→ repository conventions
+→ taste-skill の aesthetic preference
+```
+
+`taste-skill` が既存 design system を無視する、未導入 dependency を勝手に前提にする、または accessibility を下げる場合は、その指示を採用しない。
 
 ---
 
@@ -634,10 +828,12 @@ V -- No --> X{Frontend?}
 
 W --> X
 
-X -- Yes --> Y[frontend-ui-engineering + runtime verification]
-X -- No --> Z{Failure / unexpected behavior?}
-
-Y --> Z
+X -- Yes --> Y{Visual direction が成果を左右する?}
+Y -- Yes --> YA[design-taste-frontend]
+Y -- No --> YB[frontend-ui-engineering + runtime verification]
+YA --> YB
+YB --> Z{Failure / unexpected behavior?}
+X -- No --> Z
 
 Z -- Yes --> AA[debugging-and-error-recovery]
 Z -- No --> AB[Targeted verification]
@@ -711,8 +907,11 @@ Q5. framework/library API に依存？
 
 Q6. browser UI？
 │
-├─ YES → frontend-ui-engineering
-│          + browser runtime verification
+├─ YES → marketing / portfolio / redesignで
+│          visual directionが重要？
+│            YES → design-taste-frontend
+│          → frontend-ui-engineering
+│          → browser runtime verification
 └─ NO
     ↓
 
@@ -1078,6 +1277,14 @@ implementation
 
 ```text
 Session / Terra
+visual direction が成果を左右する？
+│
+├─ landing / portfolio / editorial / redesign
+│      → design-taste-frontend
+│
+└─ dashboard / data table / multi-step product UI
+       → 原則 taste-skill を足さない
+↓
 frontend-ui-engineering
 ↓
 implementation
@@ -1095,6 +1302,10 @@ loading/error/empty states
 視覚的に正しいことは source code だけでは証明できない。
 
 Browser runtime で確認する。
+
+`taste-skill` の自己評価だけで完了にしない。desktop / mobile、keyboard、contrast、reduced motion、loading / error / empty state、console error を実際に確認する。
+
+`design-taste-frontend` は visual direction を広げる一方、特定の font、icon、Motion、GSAP、Tailwind などを推奨することがある。導入前に `package.json` と既存 design system を確認し、必要な dependency は `source-driven-development` で installed version と公式資料を検証してから追加する。
 
 ---
 
@@ -1803,6 +2014,36 @@ Update 後：
 
 ---
 
+## Taste skill
+
+v2 は experimental のため、自動的に最新版へ追従しない。
+
+更新前：
+
+```bash
+npx skills add Leonxlnx/taste-skill --list
+```
+
+次を確認してから更新する。
+
+```text
+□ upstream CHANGELOG を読んだ
+□ 現在の SKILL.md との差分を読んだ
+□ install name が変わっていない
+□ framework / dependency の前提が現行 project と一致する
+□ representative UI task を1つ選んだ
+```
+
+更新：
+
+```bash
+npx skills update design-taste-frontend
+```
+
+更新後は同じ brief と viewport で before / after を比較する。見た目だけでなく、accessibility、runtime error、bundle / dependency 増加、mobile behavior も確認する。
+
+---
+
 # 37. 月1メンテナンス
 
 月1回程度：
@@ -1811,11 +2052,12 @@ Update 後：
 1. Codex update確認
 2. Addy skills update確認
 3. Matt skills update
-4. Global AGENTS.mdを読む
-5. 重複instructionを削る
-6. 使っていないcustom ruleを削る
-7. 実際に頻繁に使うskillsを確認
-8. routingの競合を確認
+4. Taste skill は changelog と利用実績を確認
+5. Global AGENTS.mdを読む
+6. 重複instructionを削る
+7. 使っていないcustom ruleを削る
+8. 実際に頻繁に使うskillsを確認
+9. routingの競合を確認
 ```
 
 Global AGENTS.md は**増やすより削る**ことを優先する。
@@ -1832,7 +2074,7 @@ Global AGENTS.md は**増やすより削る**ことを優先する。
 Test A: trivial bug
 Test B: normal feature
 Test C: framework integration
-Test D: frontend
+Test D: frontend（taste-skill あり / なしを同じ brief で比較）
 Test E: difficult bug
 Test F: architectural change
 ```
@@ -1901,6 +2143,9 @@ Q3. 月に複数回使う？
 Q4. skillが恒久ruleなのかworkflowなのか？
    恒久rule → AGENTS.md候補
    workflow → Skill候補
+
+Q5. experimental / third-party skillか？
+   YES → project scopeで試し、SKILL.mdと更新差分をreviewする
 ```
 
 ---
@@ -2051,9 +2296,15 @@ Ship
                               /      \
                             YES       NO
                              ↓         ↓
-                         UI + Browser  │
-                              \        /
-                               ↓      ↓
+                       visual direction?│
+                         /       \      │
+                       YES        NO     │
+                        ↓          │     │
+                      TASTE        │     │
+                         \         /     │
+                          UI + Browser   │
+                               \        /
+                                ↓      ↓
                                 Verify
                                    ↓
                                 Failure?
@@ -2109,6 +2360,14 @@ Thinking / Design Discipline
 ```
 
 として使う。
+
+Taste skill を、
+
+```text
+Frontend Visual Direction
+```
+
+として条件付きで使う。engineering correctness の代替にはしない。
 
 Codex のモデルは、
 
@@ -2173,5 +2432,11 @@ Codex を「巨大な一つの会話で何でもやらせるAI」ではなく、
 外部ツールの仕様や導入手順は変わり得るため、実行前に次の一次情報で現行状態を確認する。
 
 - [OpenAI Model guidance](https://developers.openai.com/api/docs/guides/latest-model)
+- [OpenAI Docs: Build skills](https://developers.openai.com/codex/skills)
 - [Addy Osmani / agent-skills](https://github.com/addyosmani/agent-skills)
 - [Matt Pocock / skills](https://github.com/mattpocock/skills)
+- [Leonxlnx / taste-skill](https://github.com/Leonxlnx/taste-skill)
+- [taste-skill README（2026-08-29確認時のcommit）](https://github.com/Leonxlnx/taste-skill/blob/ccbc15639c97057cbfcf32ecebc38ef716e4bb37/README.md)
+- [taste-skill main SKILL.md（2026-08-29確認時のcommit）](https://github.com/Leonxlnx/taste-skill/blob/ccbc15639c97057cbfcf32ecebc38ef716e4bb37/skills/taste-skill/SKILL.md)
+- [taste-skill CHANGELOG（2026-08-29確認時のcommit）](https://github.com/Leonxlnx/taste-skill/blob/ccbc15639c97057cbfcf32ecebc38ef716e4bb37/CHANGELOG.md)
+- [vercel-labs / skills CLI（2026-08-29確認時のcommit）](https://github.com/vercel-labs/skills/blob/435076e78988e1e6ec40d00b0b1d76bdbbc5419a/README.md)

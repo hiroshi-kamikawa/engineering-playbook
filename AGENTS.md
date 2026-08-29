@@ -1,0 +1,5 @@
+- Make only the smallest changes required to satisfy the explicit requirements; do not add unrequested features, abstractions, dependencies, or future-proofing.
+- Map every action to an explicit requirement or a concrete known risk; skip research, implementation, or verification that maps to neither.
+- Scale testing to the risk of the change; do not add tests that duplicate existing coverage or cannot detect a distinct failure.
+- Run full verification and review once at the end by default; repeat them only after a relevant change or an unresolved failure.
+- Stop when sufficient evidence proves the requirements are met; do not continue working solely to gain additional confidence.
