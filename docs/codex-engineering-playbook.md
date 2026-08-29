@@ -394,6 +394,11 @@ Workflow は Skills に任せる。
 - After creating a PR, verify it with `gh pr view`.
 
 ## Development Practices
+- Make only the smallest changes required to satisfy the explicit requirements; do not add unrequested features, abstractions, dependencies, or future-proofing.
+- Map every action to an explicit requirement or a concrete known risk; skip research, implementation, or verification that maps to neither.
+- Scale testing to the risk of the change; do not add tests that duplicate existing coverage or cannot detect a distinct failure.
+- Run full verification and review once at the end by default; repeat them only after a relevant change or an unresolved failure.
+- Stop when sufficient evidence proves the requirements are met; do not continue working solely to gain additional confidence.
 - Prefer the simplest implementation that fully satisfies the current requirements. Avoid speculative abstractions, configuration, indirection, and extension points for hypothetical future needs.
 - Grow the system in thin, working vertical slices. Each increment should leave the product in a working, testable state.
 - Prefer cohesive, deep modules with small interfaces over layers of shallow wrappers or pass-through abstractions. Introduce a seam only when behavior actually varies across it.
